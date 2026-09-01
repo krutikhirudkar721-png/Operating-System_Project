@@ -80,5 +80,4 @@ if __name__ == "__main__":
         best = "LRU"
     else:
         best = "FIFO"
-
     print(f"\nBest Algorithm: {best}")
