@@ -35,7 +35,6 @@ def optimal(reference_string, frames):
     page_faults = 0
     for i in range(len(reference_string)):
         page = reference_string[i]
-
         if page not in memory:
             if len(memory) < frames:
                 memory.append(page)
