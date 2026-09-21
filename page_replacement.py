@@ -1,5 +1,4 @@
-def fifo(reference_string, frames):
-    
+def fifo(reference_string, frames):
     memory = []
     page_faults = 0
     index = 0
