@@ -1,4 +1,6 @@
 def fifo(reference_string, frames):
+    """Simulate FIFO page replacement."""
+
     memory = []
     page_faults = 0
     page_hits = 0
@@ -11,7 +13,6 @@ def fifo(reference_string, frames):
         if page in memory:
             page_hits += 1
             status = "HIT"
-
         else:
             page_faults += 1
             status = "FAULT"
@@ -34,6 +35,8 @@ def fifo(reference_string, frames):
 
 
 def lru(reference_string, frames):
+    """Simulate LRU page replacement."""
+
     memory = []
     recent = []
     page_faults = 0
@@ -47,7 +50,7 @@ def lru(reference_string, frames):
             page_hits += 1
             status = "HIT"
 
-            # Move page to the most recently used position
+            # Move the page to the most recently used position.
             recent.remove(page)
             recent.append(page)
 
@@ -58,7 +61,7 @@ def lru(reference_string, frames):
             if len(memory) < frames:
                 memory.append(page)
             else:
-                # Least recently used page
+                # The first page in 'recent' is the least recently used.
                 lru_page = recent.pop(0)
 
                 replaced = lru_page
@@ -77,6 +80,8 @@ def lru(reference_string, frames):
 
 
 def optimal(reference_string, frames):
+    """Simulate Optimal page replacement."""
+
     memory = []
     page_faults = 0
     page_hits = 0
@@ -95,7 +100,6 @@ def optimal(reference_string, frames):
 
             if len(memory) < frames:
                 memory.append(page)
-
             else:
                 future = reference_string[i + 1:]
 
@@ -104,6 +108,8 @@ def optimal(reference_string, frames):
 
                 for mem_page in memory:
 
+                    # If this page will never be used again,
+                    # it is a valid choice for replacement.
                     if mem_page not in future:
                         replace_page = mem_page
                         break
@@ -127,25 +133,28 @@ def optimal(reference_string, frames):
     return page_faults, page_hits, history
 
 
-def print_simulation(name, history, frames):
-    print(f"\n{'=' * 65}")
-    print(f"{name} PAGE REPLACEMENT")
-    print(f"{'=' * 65}")
+def print_simulation(algorithm, history, frames):
+    """Display the frame-by-frame simulation."""
 
-    print(
-        f"{'Step':<6}"
-        f"{'Page':<7}"
-        + "".join(f"F{i + 1:<7}" for i in range(frames))
-        + f"{'Status':<15}"
-    )
+    print("\n" + "=" * 65)
+    print(f"{algorithm} PAGE REPLACEMENT")
+    print("=" * 65)
 
+    header = f"{'Step':<7}{'Page':<7}"
+
+    for i in range(frames):
+        header += f"F{i + 1:<7}"
+
+    header += f"{'Status':<15}"
+
+    print(header)
     print("-" * 65)
 
-    for step, data in enumerate(history, 1):
+    for step, data in enumerate(history, start=1):
 
         frame_values = data["frames"].copy()
 
-        # Display empty frames as '-'
+        # Show empty frames with '-'.
         while len(frame_values) < frames:
             frame_values.append("-")
 
@@ -154,57 +163,80 @@ def print_simulation(name, history, frames):
         if data["replaced"] is not None:
             status += f" (R:{data['replaced']})"
 
-        print(
-            f"{step:<6}"
-            f"{data['page']:<7}"
-            + "".join(f"{str(frame):<7}" for frame in frame_values)
-            + f"{status:<15}"
-        )
+        row = f"{step:<7}{data['page']:<7}"
+
+        for frame in frame_values:
+            row += f"{str(frame):<7}"
+
+        row += f"{status:<15}"
+
+        print(row)
 
 
-def print_result(name, faults, hits, total):
-    hit_ratio = hits / total
-    fault_ratio = faults / total
+def print_comparison(results, total_references):
+    """Display the final comparison table."""
+
+    print("\n" + "=" * 70)
+    print("FINAL COMPARISON")
+    print("=" * 70)
 
     print(
-        f"{name:<12}"
-        f"{faults:<12}"
-        f"{hits:<12}"
-        f"{hit_ratio:<12.2%}"
-        f"{fault_ratio:<12.2%}"
+        f"{'Algorithm':<14}"
+        f"{'Faults':<12}"
+        f"{'Hits':<12}"
+        f"{'Hit Ratio':<14}"
+        f"{'Fault Ratio':<14}"
     )
+
+    print("-" * 70)
+
+    for name, faults, hits in results:
+
+        hit_ratio = hits / total_references
+        fault_ratio = faults / total_references
+
+        print(
+            f"{name:<14}"
+            f"{faults:<12}"
+            f"{hits:<12}"
+            f"{hit_ratio:.2%}{'':<8}"
+            f"{fault_ratio:.2%}"
+        )
+
+    print("=" * 70)
 
 
 def main():
-
     print("\n" + "=" * 65)
-    print("       OS PAGE REPLACEMENT ALGORITHM SIMULATOR")
+    print("        OS PAGE REPLACEMENT ALGORITHM SIMULATOR")
     print("=" * 65)
 
+    # Get reference string.
     try:
         reference_string = list(
-            map(
-                int,
-                input("\nEnter reference string: ").split()
-            )
+            map(int, input("\nEnter reference string: ").split())
         )
-
-        frames = int(
-            input("Enter number of frames: ")
-        )
-
-        if not reference_string:
-            print("Error: Reference string cannot be empty.")
-            return
-
-        if frames <= 0:
-            print("Error: Number of frames must be greater than 0.")
-            return
-
     except ValueError:
-        print("Error: Please enter valid integer values.")
+        print("Error: Please enter only integer page numbers.")
         return
 
+    # Check reference string.
+    if not reference_string:
+        print("Error: Reference string cannot be empty.")
+        return
+
+    # Get number of frames.
+    try:
+        frames = int(input("Enter number of frames: "))
+    except ValueError:
+        print("Error: Number of frames must be an integer.")
+        return
+
+    if frames <= 0:
+        print("Error: Number of frames must be greater than 0.")
+        return
+
+    # Run all three algorithms.
     fifo_faults, fifo_hits, fifo_history = fifo(
         reference_string, frames
     )
@@ -217,58 +249,28 @@ def main():
         reference_string, frames
     )
 
-    total = len(reference_string)
-
-    print("\nReference String:", reference_string)
+    # Display input information.
+    print("\nReference String:", " ".join(map(str, reference_string)))
     print("Number of Frames:", frames)
 
-    # Detailed simulation
+    # Display step-by-step simulation.
     print_simulation("FIFO", fifo_history, frames)
     print_simulation("LRU", lru_history, frames)
     print_simulation("OPTIMAL", optimal_history, frames)
 
-    # Final comparison
-    print("\n" + "=" * 65)
-    print("                    FINAL COMPARISON")
-    print("=" * 65)
+    # Display final results.
+    results = [
+        ("FIFO", fifo_faults, fifo_hits),
+        ("LRU", lru_faults, lru_hits),
+        ("Optimal", optimal_faults, optimal_hits)
+    ]
 
-    print(
-        f"{'Algorithm':<12}"
-        f"{'Faults':<12}"
-        f"{'Hits':<12}"
-        f"{'Hit Ratio':<12}"
-        f"{'Fault Ratio':<12}"
-    )
-
-    print("-" * 65)
-
-    print_result(
-        "FIFO",
-        fifo_faults,
-        fifo_hits,
-        total
-    )
-
-    print_result(
-        "LRU",
-        lru_faults,
-        lru_hits,
-        total
-    )
-
-    print_result(
-        "Optimal",
-        optimal_faults,
-        optimal_hits,
-        total
-    )
-
-    print("=" * 65)
+    print_comparison(results, len(reference_string))
 
     print("\nNote:")
     print(
-        "Optimal Page Replacement is a theoretical benchmark "
-        "because it requires knowledge of future references."
+        "Optimal is mainly used as a theoretical benchmark because "
+        "it requires knowledge of future page references."
     )
 
 
