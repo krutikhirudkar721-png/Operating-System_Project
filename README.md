@@ -1,153 +1,118 @@
-# OS Page Replacement Simulator
+# OS Page Replacement
 
-A Python-based simulation project for studying and comparing **page replacement algorithms** used in Operating Systems.
+A small Python project that simulates and compares three page replacement algorithms used in Operating Systems:
 
-The simulator implements:
+* FIFO (First-In-First-Out)
+* LRU (Least Recently Used)
+* Optimal Page Replacement
 
-* **FIFO (First-In-First-Out)**
-* **LRU (Least Recently Used)**
-* **Optimal Page Replacement**
+The program takes a page reference string and the number of available memory frames, then shows how each algorithm handles the page references.
 
-For a given reference string and number of memory frames, the program calculates page faults, page hits, replacements, hit ratio, and fault ratio.
-
----
-
-## 📌 Project Overview
-
-In a virtual memory system, a page fault occurs when a process references a page that is not currently available in physical memory.
-
-When all available frames are occupied, the Operating System must decide which existing page should be removed. This decision is made using a **page replacement algorithm**.
-
-This project demonstrates how different page replacement strategies behave for the same reference string.
+It also calculates page faults, page hits, hit ratio, and fault ratio.
 
 ---
 
-## 🚀 Algorithms Implemented
+## What is Page Replacement?
 
-### 1. FIFO – First-In-First-Out
+In a virtual memory system, a process may request a page that is not currently present in physical memory. This causes a **page fault**.
 
-FIFO replaces the page that has been present in memory for the longest period of time.
+If all available memory frames are already occupied, the operating system has to decide which page should be removed to make space for the new page.
 
-**Idea:**
+This decision is made using a page replacement algorithm.
 
-> The first page loaded into memory is the first page to be replaced.
-
-**Advantages:**
-
-* Simple to understand
-* Easy to implement
-* Low implementation overhead
-
-**Limitation:**
-
-* It does not consider how frequently or recently a page is being used.
-* It can suffer from **Belady's Anomaly**, where increasing the number of frames can sometimes increase page faults.
+This project demonstrates three commonly studied algorithms: FIFO, LRU, and Optimal.
 
 ---
 
-### 2. LRU – Least Recently Used
+## Algorithms Used
 
-LRU replaces the page that has not been used for the longest period of time.
+### FIFO - First-In-First-Out
 
-**Idea:**
+FIFO replaces the page that has been in memory for the longest time.
 
-> Pages that have not been used recently are more likely to be replaced.
+In simple terms:
 
-LRU attempts to exploit the principle of **temporal locality**.
+> The page that entered memory first is removed first.
 
-**Advantages:**
+FIFO is easy to understand and implement, but it does not consider how recently or how frequently a page is being used.
 
-* Usually performs better than simple FIFO on many workloads
-* Makes use of recent page-access information
-
-**Limitation:**
-
-* Requires additional tracking of page usage
-* More implementation overhead than FIFO
+One important property of FIFO is that it can show **Belady's anomaly**, where increasing the number of frames can sometimes result in more page faults.
 
 ---
 
-### 3. Optimal Page Replacement
+### LRU - Least Recently Used
+
+LRU replaces the page that has not been used for the longest time in the past.
+
+The basic idea is that a page used recently may be needed again soon, while a page that has not been used for a long time may be less likely to be needed.
+
+LRU uses the recent access history of pages to make the replacement decision.
+
+In this project, a list is used to keep track of the order in which pages were recently used.
+
+---
+
+### Optimal Page Replacement
 
 The Optimal algorithm replaces the page whose next use is farthest in the future.
 
-**Idea:**
-
-> Replace the page that will be needed latest in the future, or will never be needed again.
-
-Optimal provides the minimum possible number of page faults for a known reference string and frame count.
-
-However, a real Operating System cannot generally know future page references, so this algorithm is primarily useful as a **theoretical benchmark** for comparing other algorithms.
-
----
-
-## 📊 Metrics Calculated
-
-The simulator reports:
-
-| Metric       | Description                                          |
-| ------------ | ---------------------------------------------------- |
-| Page Faults  | Number of references that were not present in memory |
-| Page Hits    | Number of references already present in memory       |
-| Replacements | Number of times an existing page was replaced        |
-| Hit Ratio    | Page Hits / Total References                         |
-| Fault Ratio  | Page Faults / Total References                       |
-
----
-
-## 🧠 Step-by-Step Simulation
-
-The program can display the state of every memory frame after each page reference.
-
-Example:
+For example, if the pages currently in memory are:
 
 ```text
-Step   Page    F1    F2    F3    Status
------------------------------------------
-1       7       7     -     -    FAULT
-2       0       7     0     -    FAULT
-3       1       7     0     1    FAULT
-4       2       2     0     1    FAULT (R:7)
-5       0       2     0     1    HIT
+1  2  3
 ```
 
-`R:x` indicates that page `x` was replaced.
+and the future reference sequence shows that page `2` will be needed much later than pages `1` and `3`, page `2` can be selected for replacement.
+
+If a page will not be used again, it can be selected immediately.
+
+The important point is that Optimal needs to know future references. Because a real operating system cannot normally know the future access pattern, Optimal is mainly useful as a theoretical benchmark for comparing other algorithms.
 
 ---
 
-## 🛠️ Requirements
+## What Does the Program Show?
 
-* Python 3.8+
-* No external libraries required
+For every page reference, the program shows:
 
-The project uses only Python's standard library.
+* Current page
+* Contents of each frame
+* Whether the reference was a `HIT` or `FAULT`
+* Which page was replaced, when applicable
+
+At the end, it displays:
+
+* Total page faults
+* Total page hits
+* Hit ratio
+* Fault ratio
+
+### Example of the simulation
+
+```text
+Step   Page   F1     F2     F3     Status
+-------------------------------------------------
+1      7      7      -      -      FAULT
+2      0      7      0      -      FAULT
+3      1      7      0      1      FAULT
+4      2      2      0      1      FAULT (R:7)
+5      0      2      0      1      HIT
+```
+
+Here:
+
+* `FAULT` means the page was not already in memory.
+* `HIT` means the page was already present.
+* `R:7` means page `7` was replaced.
 
 ---
 
-## ▶️ How to Run
+## Input
 
-Clone the repository:
+The program asks for two things.
 
-```bash
-git clone <your-repository-url>
-cd OS-Page-Replacement
-```
+### 1. Reference String
 
-Run the program:
-
-```bash
-python page_replacement.py
-```
-
----
-
-## 📝 Input Format
-
-The program asks for:
-
-### Reference String
-
-Enter page references separated by spaces.
+Enter page numbers separated by spaces.
 
 Example:
 
@@ -155,7 +120,9 @@ Example:
 7 0 1 2 0 3 0 4 2 3 0 3 2
 ```
 
-### Number of Frames
+### 2. Number of Frames
+
+Enter the number of physical memory frames.
 
 Example:
 
@@ -165,36 +132,90 @@ Example:
 
 ---
 
-## 📈 Example
+## How to Run
 
-Input:
+Make sure Python is installed on your system.
 
-```text
-Enter reference string (space-separated): 7 0 1 2 0 3 0 4
-Enter number of frames: 3
+Open the project folder in VS Code and run:
+
+```bash
+python page_replacement.py
 ```
 
-The simulator executes FIFO, LRU, and Optimal independently and displays their statistics.
+On systems where Python is available through `python3`, use:
 
-Example comparison format:
-
-```text
-==================================================================================
-ALGORITHM COMPARISON
-==================================================================================
-Algorithm      Faults      Hits        Replacements    Hit Ratio    Fault Ratio
-----------------------------------------------------------------------------------
-FIFO           ...         ...         ...             ...          ...
-LRU            ...         ...         ...             ...          ...
-Optimal        ...         ...         ...             ...          ...
-==================================================================================
+```bash
+python3 page_replacement.py
 ```
 
-The exact values depend on the supplied reference string and number of frames.
+No external Python packages are required.
+
+The project uses standard Python features only.
 
 ---
 
-## ⏱️ Complexity
+## Example Input
+
+```text
+Enter reference string: 7 0 1 2 0 3 0 4 2 3 0 3 2
+Enter number of frames: 3
+```
+
+For this particular reference string with three frames, the page-fault counts are:
+
+```text
+FIFO       10
+LRU         9
+Optimal     7
+```
+
+The exact result depends on the reference string and the number of frames.
+
+---
+
+## Results
+
+The final output contains a comparison similar to:
+
+```text
+======================================================================
+FINAL COMPARISON
+======================================================================
+Algorithm     Faults      Hits        Hit Ratio     Fault Ratio
+----------------------------------------------------------------------
+FIFO          10          3           23.08%        76.92%
+LRU            9          4           30.77%        69.23%
+Optimal        7          6           46.15%        53.85%
+======================================================================
+```
+
+The values above correspond specifically to:
+
+```text
+Reference String:
+7 0 1 2 0 3 0 4 2 3 0 3 2
+
+Frames:
+3
+```
+
+---
+
+## Understanding the Results
+
+The number of page faults depends on both:
+
+1. The page replacement algorithm
+2. The order of pages in the reference string
+3. The number of available frames
+
+Optimal provides a useful theoretical reference because it chooses the replacement using future information. FIFO and LRU make their decisions without knowing future references.
+
+The project therefore does not label one algorithm as universally "best." Instead, it shows the actual results for the given workload.
+
+---
+
+## Time Complexity
 
 Let:
 
@@ -203,7 +224,7 @@ Let:
 
 ### FIFO
 
-Approximately:
+The implementation searches the frame list for each reference.
 
 ```text
 Time:  O(n × f)
@@ -212,7 +233,7 @@ Space: O(f + n)
 
 ### LRU
 
-The current educational implementation maintains a list of recently used pages.
+The implementation uses a list to maintain the recent-use order.
 
 ```text
 Time:  O(n × f)
@@ -221,68 +242,85 @@ Space: O(f + n)
 
 ### Optimal
 
-For every page fault, the algorithm searches the future reference string to determine which page will be needed last.
+For a page fault, the program searches the future reference sequence to determine when pages will be used again.
 
 ```text
 Time:  O(n²)
 Space: O(f + n)
 ```
 
-The implementation prioritizes clarity and educational value over low-level optimization.
+These are the complexities of this particular educational implementation, not necessarily the complexity of every possible implementation of these algorithms.
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 OS-Page-Replacement/
 │
 ├── page_replacement.py
-├── README.md
-└── LICENSE
+└── README.md
 ```
 
 ---
 
-## 🎯 Learning Objectives
+## Why I Made This Project
 
-This project demonstrates:
+The main purpose of this project is to understand page replacement algorithms by actually simulating them rather than only studying their definitions.
 
-* Virtual memory concepts
-* Page faults and page hits
-* Memory-frame management
+It makes it easier to see:
+
+* When a page fault occurs
+* When a page hit occurs
+* Which page gets replaced
+* How FIFO and LRU make different decisions
+* Why Optimal can be used as a benchmark
+
+---
+
+## Learning Outcomes
+
+After working with this project, the main concepts covered are:
+
+* Virtual memory
+* Page faults
+* Page hits
+* Physical memory frames
 * FIFO page replacement
 * LRU page replacement
 * Optimal page replacement
-* Hit and fault ratios
-* Algorithm comparison
-* Simulation of memory state
-* Basic Python software design
+* Hit ratio and fault ratio
+* Simulation of memory states
+* Comparison of replacement algorithms
 
 ---
 
-## 🔬 Important Observation
+## Limitations
 
-The number of page faults depends on both:
+This is an educational simulation and not an implementation of an actual operating-system memory manager.
 
-1. The selected page replacement algorithm
-2. The number and order of memory references
+In particular:
 
-Therefore, the simulator should be used with multiple reference strings and frame counts when studying algorithm behavior.
-
-Optimal Page Replacement is included primarily as a theoretical reference because it assumes knowledge of future page references.
+* The Optimal algorithm assumes future page references are known.
+* The LRU implementation uses a simple list rather than hardware-supported mechanisms.
+* The program works with a supplied reference string instead of generating real memory accesses.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Your Name**
 
 Operating Systems Mini Project
-Page Replacement Algorithm Simulator
+
+### Technologies
+
+* Python
+* Operating Systems concepts
+* Page Replacement Algorithms
 
 ---
 
-## 📜 License
+## License
 
-This project is intended for educational purposes.
+This project is created for educational purposes.
